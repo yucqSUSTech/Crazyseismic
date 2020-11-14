@@ -1,0 +1,2 @@
+/Users/Chunquan/Dropbox/MyCodes/y_crazyseismic_v3.3/data_demo/Stations/IC.BJT
+/Users/Chunquan/Dropbox/MyCodes/y_crazyseismic_v3.3/data_demo/Stations/IC.LSA
