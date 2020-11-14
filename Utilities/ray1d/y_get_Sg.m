@@ -1,0 +1,50 @@
+function  [rayp, taup1, dtaup1]= y_get_Sg (evdp, np, em)
+
+em.vs(find(em.vs==0))=1e-9;
+sp_fine = (em.re - em.z)./em.vp; 
+ss_fine = (em.re - em.z)./em.vs;  
+
+if evdp > em.z_moho
+    fprintf('Event below Moho, No Sg phase');
+    rayp = zeros(1,np);
+    taup1 = nan(1,np);
+    dtaup1 = linspace(0,1,np)*2*pi;
+    return;
+end
+ztmp = em.z_moho - 10^-6; 
+[pmin,iflag] =  interp1db ( ztmp, em.z, ss_fine );
+
+ztmp = evdp + 10^-6; 
+[pmax,iflag] =  interp1db ( ztmp, em.z, ss_fine );
+
+% for upgoing p wave
+dp0 = ( pmax - 0) /(np -1);
+for j =1: np
+%     pj = pmax - (j-1)*dp0;
+    pj = (j-1)* dp0 ;
+    rayp(j) = pj;
+    [rtmp2, dtmp2]= tau (0.0,evdp,pj, em.z, ss_fine);
+    taup1(j) = rtmp2;
+    dtaup1(j) = dtmp2;
+end
+
+% for downgoing Pg wave in the crust
+dp = ( pmax- pmin) /(np -1);
+nj = 0;
+for j =1: np
+    pj = pmax - (j-1)*dp;
+    zt= wise_turn_v3 (pj, [evdp em.z_moho],  em.z, ss_fine);
+    zt = zt - 0.5*10^-6;
+    if zt < 0
+        continue;
+    end
+    nj = nj + 1;
+    [rtmp1, dtmp1]= tau (evdp, zt ,pj, em.z, ss_fine);
+    [rtmp2, dtmp2]= tau (0.0,evdp,pj, em.z, ss_fine);
+    rayp(np+nj) = pj;
+    taup1(np+nj) = 2* rtmp1 + rtmp2;
+    dtaup1(np+nj) = 2* dtmp1 + dtmp2;
+end
+
+
+end
